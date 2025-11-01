@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linear Sort Visualizer</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <header>
+        <h1>Linear-Time Sort Visualizer</h1>
+        <nav>
+            <div class="control-group">
+                <label for="algo-select">Choose Algorithm:</label>
+                <select id="algo-select">
+                    <option value="radix">Radix Sort (LSD)</option>
+                    <option value="counting">Counting Sort</option>
+                    <option value="bucket">Bucket Sort</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="speed-slider">Speed:</label>
+                <input type="range" id="speed-slider" min="10" max="1000" value="250" step="10">
+            </div>
+
+            <button id="start-btn" class="btn">Start</button>
+            <button id="pause-btn" class="btn btn-outline" disabled>Pause</button> 
+            
+            <button id="random-btn" class="btn btn-outline">Random Array</button>
+        </nav>
+        
+        <div class="array-input-container">
+            <input type="text" id="array-input" placeholder="Enter numbers, e.g: 25, 8, 14, 99, 3">
+            <button id="load-btn" class="btn">Load Array</button>
+        </div>
+        <p id="input-error"></p>
+
+    </header>
+
+    <main>
+        <div id="visualization-area" class="visualization-container"></div>
+        
+        <div id="sub-area-container">
+            <h3 id="sub-area-title"></h3>
+            <div id="sub-area" class="visualization-container"></div>
+        </div>
+
+        <div id="explanation-box">
+            <p>Enter an array or generate a random one to begin.</p>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
