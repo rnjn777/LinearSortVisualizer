@@ -24,7 +24,7 @@ body {
     font-family: var(--font-family);
     margin: 0;
     padding: 1.5rem;
-    padding-bottom: 80px; /* Adjusted padding for taller status bar */
+    padding-bottom: 80px;
     min-height: 100vh;
     box-sizing: border-box;
     overflow-x: hidden;
@@ -305,11 +305,10 @@ select:focus, .btn:focus {
     background-color: var(--primary-color);
     border-top: 1px solid var(--secondary-color);
     box-shadow: 0 0 10px var(--secondary-color);
-    padding: 0.5rem 1.5rem; /* Adjusted padding */
+    padding: 0.5rem 1.5rem;
     box-sizing: border-box;
     z-index: 10;
     
-    /* NEW: Flexbox to align text and button */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -319,7 +318,8 @@ select:focus, .btn:focus {
     margin: 0;
     font-size: 1rem;
     font-weight: 400;
-    flex-grow: 1; /* Make text take up available space */
+    flex-grow: 1;
+    text-align: center; /* Center the text */
 }
 
 #status-bar b {
@@ -327,10 +327,12 @@ select:focus, .btn:focus {
     font-weight: 700;
 }
 
-/* NEW: Style for pause button inside status bar */
-#status-bar #pause-btn {
-    margin-left: 1rem; /* Add space */
-    flex-shrink: 0; /* Don't let the button shrink */
+/* Style for buttons in status bar */
+#status-bar #pause-btn,
+#status-bar #mute-btn {
+    flex-shrink: 0; /* Don't let buttons shrink */
+    padding: 0.5rem 0.75rem; /* Make buttons a bit smaller */
+    font-size: 0.8rem;
 }
 
 
