@@ -110,7 +110,8 @@ select:focus, .btn:focus {
     box-shadow: 0 0 15px var(--accent-color);
 }
 
-.btn.btn-pause-active {
+.btn.btn-pause-active,
+.btn.btn-step-active {
     background-color: var(--highlight-secondary);
     color: var(--bg-color);
     border-color: var(--highlight-secondary);
@@ -184,7 +185,7 @@ select:focus, .btn:focus {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    min-height: 250px;
+    min-height: 450px;
     padding: 1rem;
     background-color: rgba(0,0,0,0.3);
     border-radius: 8px;
@@ -228,7 +229,7 @@ select:focus, .btn:focus {
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
-    min-height: 150px;
+    min-height: 250px;
     min-width: 60px;
     border: 2px dashed var(--primary-color);
     border-radius: 8px;
@@ -254,15 +255,15 @@ select:focus, .btn:focus {
 
 .count-cell {
     position: relative;
-    width: 50px;
-    height: 50px;
+    width: 80px;
+    height: 80px;
+    font-size: 1.8rem;
     border: 2px solid var(--primary-color);
     border-radius: 8px;
-    margin: 2px;
+    margin: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
     font-family: var(--font-mono);
     font-weight: 700;
     transition: all 0.3s ease;
@@ -271,9 +272,9 @@ select:focus, .btn:focus {
 
 .count-label {
     position: absolute;
-    top: -20px;
-    font-size: 0.8rem;
-    color: var(--primary-color);
+    top: -22px;
+    font-size: 0.9rem;
+    color: var(--text-color);
     font-family: var(--font-mono);
 }
 
@@ -296,7 +297,7 @@ select:focus, .btn:focus {
     box-shadow: none;
 }
 
-/* --- UPDATED: Status Bar --- */
+/* --- Status Bar --- */
 #status-bar {
     position: fixed;
     bottom: 0;
@@ -319,7 +320,7 @@ select:focus, .btn:focus {
     font-size: 1rem;
     font-weight: 400;
     flex-grow: 1;
-    text-align: center; /* Center the text */
+    text-align: center;
 }
 
 #status-bar b {
@@ -327,12 +328,16 @@ select:focus, .btn:focus {
     font-weight: 700;
 }
 
-/* Style for buttons in status bar */
 #status-bar #pause-btn,
 #status-bar #mute-btn {
-    flex-shrink: 0; /* Don't let buttons shrink */
-    padding: 0.5rem 0.75rem; /* Make buttons a bit smaller */
+    flex-shrink: 0;
+    padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
+}
+
+/* --- Hide/show rules for step/pause --- */
+#pause-btn.hidden {
+    display: none;
 }
 
 
@@ -451,8 +456,8 @@ select:focus, .btn:focus {
 .radix-column p {
     margin: 0.25rem 0;
     font-family: var(--font-mono);
+    font-size: 1.2rem;
     font-weight: 700;
-    font-size: 1.1rem;
     color: var(--text-color);
     text-align: center;
     background: rgba(0,0,0,0.1);
