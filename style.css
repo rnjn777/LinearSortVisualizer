@@ -1,13 +1,28 @@
 /* --- Google Font Import --- */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap');
 
-/* --- CSS Variables for Sci-Fi Dark Mode --- */
+/* --- CSS Variables --- */
 :root {
+    /* --- Dark Mode (Default) --- */
     --bg-color: #0d0c1d;
     --primary-color: #1a1a3a;
     --secondary-color: #00f0ff;
     --accent-color: #c000ff;
     --text-color: #f0f0ff;
+    --header-bg: rgba(26, 26, 58, 0.4);
+    --panel-border: var(--primary-color);
+    --panel-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+    --text-glow: 0 0 4px var(--secondary-color);
+    --btn-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+    --btn-hover-shadow: 0 0 15px var(--secondary-color);
+    --btn-outline-shadow: 0 0 5px rgba(192, 0, 255, 0.3);
+    --btn-outline-hover-shadow: 0 0 15px var(--accent-color);
+    --bar-color: var(--secondary-color);
+    --bar-text-color: var(--bg-color);
+    --bar-shadow: 0 0 2px var(--secondary-color);
+    --bucket-shadow: 0 0 10px var(--primary-color) inset;
+    --count-label-color: var(--primary-color);
+    --modal-bg: rgba(13, 12, 29, 0.8);
     
     --highlight-primary: #ff00ff;
     --highlight-secondary: #00ff8c;
@@ -16,6 +31,30 @@
     --font-family: 'Montserrat', sans-serif;
     --font-mono: 'Roboto Mono', monospace;
 }
+
+body.light-mode {
+    /* --- Light Mode --- */
+    --bg-color: #f4f7fc;
+    --primary-color: #ffffff;
+    --secondary-color: #007bff;
+    --accent-color: #6f42c1;
+    --text-color: #212529;
+    --header-bg: rgba(255, 255, 255, 0.7);
+    --panel-border: #e0e0e0;
+    --panel-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    --text-glow: none;
+    --btn-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --btn-hover-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    --btn-outline-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --btn-outline-hover-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    --bar-color: var(--secondary-color);
+    --bar-text-color: #ffffff;
+    --bar-shadow: 0 0 2px var(--secondary-color);
+    --bucket-shadow: 0 0 5px rgba(0,0,0,0.1) inset;
+    --count-label-color: #6c757d;
+    --modal-bg: rgba(255, 255, 255, 0.8);
+}
+
 
 body {
     background-color: var(--bg-color);
@@ -28,16 +67,19 @@ body {
     min-height: 100vh;
     box-sizing: border-box;
     overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* --- Header & Controls (Glass Panel Look) --- */
 header {
-    background-color: rgba(26, 26, 58, 0.4);
-    border: 1px solid var(--primary-color);
+    background-color: var(--header-bg);
+    border: 1px solid var(--panel-border);
     padding: 1rem 2rem;
     border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), 0 0 5px rgba(0, 240, 255, 0.2) inset;
+    box-shadow: var(--panel-shadow);
     margin-bottom: 2rem;
+    backdrop-filter: blur(5px);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 header h1 {
@@ -46,7 +88,8 @@ header h1 {
     color: var(--secondary-color);
     font-family: var(--font-mono);
     font-weight: 700;
-    text-shadow: 0 0 4px var(--secondary-color);
+    text-shadow: var(--text-glow);
+    transition: color 0.3s ease, text-shadow 0.3s ease;
 }
 
 nav {
@@ -79,7 +122,7 @@ select, .btn {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
+    box-shadow: var(--btn-shadow);
 }
 
 select {
@@ -95,19 +138,19 @@ select:focus, .btn:focus {
     transform: translateY(-2px);
     background-color: var(--secondary-color);
     color: var(--bg-color);
-    box-shadow: 0 0 15px var(--secondary-color);
+    box-shadow: var(--btn-hover-shadow);
 }
 
 .btn.btn-outline {
     border-color: var(--accent-color);
     color: var(--accent-color);
-    box-shadow: 0 0 5px rgba(192, 0, 255, 0.3);
+    box-shadow: var(--btn-outline-shadow);
 }
 
 .btn.btn-outline:hover {
     background-color: var(--accent-color);
     color: var(--bg-color);
-    box-shadow: 0 0 15px var(--accent-color);
+    box-shadow: var(--btn-outline-hover-shadow);
 }
 
 .btn.btn-pause-active,
@@ -116,6 +159,10 @@ select:focus, .btn:focus {
     color: var(--bg-color);
     border-color: var(--highlight-secondary);
     box-shadow: 0 0 15px var(--highlight-secondary);
+}
+body.light-mode .btn.btn-pause-active,
+body.light-mode .btn.btn-step-active {
+    color: var(--primary-color);
 }
 
 .btn:disabled {
@@ -164,11 +211,18 @@ select:focus, .btn:focus {
     font-size: 0.9rem;
     transition: all 0.3s ease;
 }
+body.light-mode #array-input {
+    background-color: rgba(0,0,0,0.02);
+    border-color: #ddd;
+}
 
 #array-input:focus {
     outline: none;
     border-color: var(--secondary-color);
     box-shadow: 0 0 10px var(--secondary-color);
+}
+body.light-mode #array-input:focus {
+    box-shadow: 0 0 8px rgba(0,123,255,0.3);
 }
 
 #input-error {
@@ -178,6 +232,9 @@ select:focus, .btn:focus {
     margin-top: 0.5rem;
     font-weight: 700;
     text-shadow: 0 0 5px var(--error-color);
+}
+body.light-mode #input-error {
+    text-shadow: none;
 }
 
 /* --- Main Visualization Area --- */
@@ -194,32 +251,40 @@ select:focus, .btn:focus {
     gap: 2px;
     transition: all 0.3s ease;
 }
+body.light-mode .visualization-container {
+    background-color: var(--primary-color);
+    border-color: var(--panel-border);
+    box-shadow: var(--panel-shadow);
+}
 
 /* --- Bar Styles --- */
 .bar {
     width: 20px;
-    background-color: var(--secondary-color);
+    background-color: var(--bar-color);
     border: none;
     border-radius: 2px 2px 0 0;
     text-align: center;
-    color: var(--bg-color);
+    color: var(--bar-text-color);
     font-size: 0.8rem;
     font-weight: 700;
     font-family: var(--font-mono);
     box-sizing: border-box;
-    box-shadow: 0 0 2px var(--secondary-color);
+    box-shadow: var(--bar-shadow);
     transition: 
         height 0.3s ease, 
         background-color 0.3s ease, 
         transform 0.3s ease,
         box-shadow 0.3s ease;
 }
+body.light-mode .bar {
+    box-shadow: 0 0 2px var(--secondary-color);
+}
 
 /* --- Sub-Area (Buckets / Count Array) --- */
 #sub-area-container h3 {
     text-align: center;
     color: var(--secondary-color);
-    text-shadow: 0 0 5px var(--secondary-color);
+    text-shadow: var(--text-glow);
     margin: 0 0 0.5rem 0;
     font-weight: 400;
 }
@@ -235,15 +300,20 @@ select:focus, .btn:focus {
     border-radius: 8px;
     padding: 5px;
     margin: 0 5px;
-    transition: background-color 0.3s ease;
-    box-shadow: 0 0 10px var(--primary-color) inset;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    box-shadow: var(--bucket-shadow);
 }
+body.light-mode .bucket {
+    border-color: #ccc;
+}
+
 
 .bucket-label {
     font-size: 0.8rem;
-    color: var(--primary-color);
+    color: var(--count-label-color);
     margin-bottom: 5px;
     font-weight: 700;
+    transition: color 0.3s ease;
 }
 
 .bucket-size {
@@ -269,6 +339,10 @@ select:focus, .btn:focus {
     transition: all 0.3s ease;
     box-shadow: 0 0 5px var(--primary-color) inset;
 }
+body.light-mode .count-cell {
+    border-color: #ddd;
+    box-shadow: 0 0 5px rgba(0,0,0,0.05) inset;
+}
 
 .count-label {
     position: absolute;
@@ -276,6 +350,9 @@ select:focus, .btn:focus {
     font-size: 0.9rem;
     color: var(--text-color);
     font-family: var(--font-mono);
+}
+body.light-mode .count-label {
+    color: var(--count-label-color);
 }
 
 /* --- Bar State Highlights (Neon Glows) --- */
@@ -290,6 +367,9 @@ select:focus, .btn:focus {
     color: var(--bg-color);
     transform: scale(1.05);
     box-shadow: 0 0 15px var(--highlight-secondary);
+}
+body.light-mode .bar.highlight-secondary {
+    color: var(--primary-color);
 }
 
 .bar.faded {
@@ -309,10 +389,15 @@ select:focus, .btn:focus {
     padding: 0.5rem 1.5rem;
     box-sizing: border-box;
     z-index: 10;
-    
     display: flex;
     align-items: center;
     justify-content: space-between;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+body.light-mode #status-bar {
+    background-color: var(--primary-color);
+    border-top-color: var(--panel-border);
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.05);
 }
 
 #status-bar p {
@@ -325,19 +410,17 @@ select:focus, .btn:focus {
 
 #status-bar b {
     color: var(--highlight-secondary);
-    font-weight: 700;
 }
+body.light-mode #status-bar b {
+    color: #00995f;
+}
+
 
 #status-bar #pause-btn,
 #status-bar #mute-btn {
     flex-shrink: 0;
     padding: 0.5rem 0.75rem;
     font-size: 0.8rem;
-}
-
-/* --- Hide/show rules for step/pause --- */
-#pause-btn.hidden {
-    display: none;
 }
 
 
@@ -348,14 +431,14 @@ select:focus, .btn:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(13, 12, 29, 0.8);
+    background-color: var(--modal-bg);
     backdrop-filter: blur(5px);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
     opacity: 1;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
 }
 
 .info-modal-container.hidden {
@@ -374,11 +457,16 @@ select:focus, .btn:focus {
     position: relative;
     color: var(--text-color);
     line-height: 1.6;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+body.light-mode #info-content-box {
+    border-color: var(--panel-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
 #info-content-box h2 {
     color: var(--secondary-color);
-    text-shadow: 0 0 5px var(--secondary-color);
+    text-shadow: var(--text-glow);
     margin-top: 0;
 }
 
@@ -404,6 +492,9 @@ select:focus, .btn:focus {
 
 #info-content-box b {
     color: var(--highlight-secondary);
+}
+body.light-mode #info-content-box b {
+    color: #00995f;
 }
 
 #close-info-btn {
@@ -443,6 +534,11 @@ select:focus, .btn:focus {
     border: 1px solid var(--secondary-color);
     box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
     min-width: 100px;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+body.light-mode .radix-column {
+    border-color: var(--panel-border);
+    box-shadow: var(--panel-shadow);
 }
 
 .radix-column h4 {
@@ -451,6 +547,10 @@ select:focus, .btn:focus {
     color: var(--secondary-color);
     border-bottom: 1px solid var(--primary-color);
     padding-bottom: 0.5rem;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+body.light-mode .radix-column h4 {
+    border-color: #eee;
 }
 
 .radix-column p {
@@ -463,4 +563,7 @@ select:focus, .btn:focus {
     background: rgba(0,0,0,0.1);
     border-radius: 4px;
     padding: 2px;
+}
+body.light-mode .radix-column p {
+    background: rgba(0,0,0,0.03);
 }
