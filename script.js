@@ -12,7 +12,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const visArea = document.getElementById('visualization-area');
     const subArea = document.getElementById('sub-area');
     const subAreaTitle = document.getElementById('sub-area-title');
-    const explanationBox = document.getElementById('explanation-box');
+    const statusBarText = document.getElementById('status-text');
+    const helpBtn = document.getElementById('help-btn');
+    const infoModal = document.getElementById('info-modal');
+    const closeInfoBtn = document.getElementById('close-info-btn');
+    const infoTitle = document.getElementById('info-title');
+    const infoSteps = document.getElementById('info-steps');
 
     // --- State ---
     let mainArray = [];
@@ -21,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isPaused = false;
     let pauseResolver = null;
     let maxDigits = 1;
+    let isDecimalArray = false;
 
     // --- Utility Functions ---
 
@@ -34,17 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
         maxVal = Math.max(...mainArray);
         if (maxVal === 0) maxVal = 1;
         maxDigits = (maxVal === 0) ? 1 : Math.floor(Math.log10(maxVal)) + 1;
-
+        isDecimalArray = newArray.some(num => num % 1 !== 0);
 
         renderBars(visArea, mainArray);
         clearSubArea();
         subArea.classList.remove('column-view');
-        updateExplanation('Array loaded. Select an algorithm and press "Start".');
-        setControls(true); // This will stop any active sort
+        updateStatus('Array loaded. Select an algorithm and press "Start".');
+        setControls(true);
         inputError.textContent = '';
     }
 
     function generateRandomArray() {
+        isDecimalArray = false; 
         const newArr = [];
         const size = 20;
         const max = 99;
@@ -67,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const numberArray = [];
 
         for (const item of stringArray) {
-            const num = parseInt(item.trim(), 10);
+            const num = parseFloat(item.trim());
             
             if (isNaN(num) || num < 0) {
                 inputError.textContent = `Invalid input: "${item.trim()}". Only positive numbers and commas.`;
@@ -96,7 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 bar.title = `Value: ${array[i]}, Digit: ${digit}`;
                 bar.style.backgroundColor = `hsl(${digit * 36}, 70%, 50%)`; 
             } else {
-                bar.innerText = array[i];
+                // --- CHANGED to toFixed(3) ---
+                bar.innerText = (array[i] % 1 !== 0) ? array[i].toFixed(3) : array[i];
                 bar.title = `Value: ${array[i]}`;
                 bar.style.backgroundColor = '';
             }
@@ -110,7 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateBar(bar, value) {
         const height = (value / maxVal) * 100;
         bar.style.height = `${Math.max(height, 5)}%`;
-        bar.innerText = value;
+        // --- CHANGED to toFixed(3) ---
+        bar.innerText = (value % 1 !== 0) ? value.toFixed(3) : value;
         bar.dataset.value = value;
     }
 
@@ -119,54 +128,40 @@ document.addEventListener('DOMContentLoaded', () => {
         subAreaTitle.innerText = '';
     }
 
-    function updateExplanation(text) {
-        explanationBox.innerHTML = `<p>${text}</p>`;
+    function updateStatus(text) {
+        statusBarText.innerHTML = text;
     }
 
     async function sleep() {
         if (isPaused) {
-            const originalText = explanationBox.innerHTML;
-            updateExplanation(originalText + "<br><strong>-- PAUSED --</strong>");
+            const originalText = statusBarText.innerHTML;
+            updateStatus(originalText + "<br><strong>-- PAUSED --</strong>");
             
             await new Promise(resolve => {
                 pauseResolver = resolve;
             });
 
-            updateExplanation(originalText);
+            updateStatus(originalText);
         }
 
-        // Check if sorting was stopped (e.g., by "Random Array") while paused
         if (!isSorting) return;
         
-        await new Promise(resolve => setTimeout(resolve, 1000 - speedSlider.value));
+        await new Promise(resolve => setTimeout(resolve, speedSlider.value));
     }
 
-    /**
-     * Enables or disables UI controls.
-     */
     function setControls(enabled) {
         isSorting = !enabled;
         
-        // These are the only controls that need to change
         startBtn.disabled = !enabled;
         algoSelect.disabled = !enabled;
         pauseBtn.disabled = enabled;
         
-        // --- MODIFICATION ---
-        // The "Random," "Load," and "Input" buttons are
-        // now ALWAYS enabled, so they act as reset/exit buttons.
-        // ---
-        // randomBtn.disabled = !enabled;    <- REMOVED
-        // loadBtn.disabled = !enabled;      <- REMOVED
-        // arrayInput.disabled = !enabled;   <- REMOVED
-        
-        // If we are stopping a sort (enabled=true), reset pause state
         if (enabled) {
             isPaused = false;
             pauseBtn.innerText = 'Pause';
             pauseBtn.classList.remove('btn-pause-active');
             if (pauseResolver) {
-                pauseResolver(); // Ensure no lingering pauses
+                pauseResolver();
                 pauseResolver = null;
             }
         }
@@ -180,10 +175,16 @@ document.addEventListener('DOMContentLoaded', () => {
     startBtn.addEventListener('click', () => {
         const algorithm = algoSelect.value;
         
+        if (isDecimalArray && (algorithm === 'counting' || algorithm === 'radix')) {
+            updateStatus(`<b>Error:</b> Counting Sort and Radix Sort only work with <b>integers</b>.
+                <br>Your array has decimals. Please use <b>Bucket Sort</b> or load a new array.`);
+            setControls(true);
+            return;
+        }
+
         const k_LIMIT = 500; 
-        
-        if ((algorithm === 'counting' && maxVal > k_LIMIT) || (algorithm === 'bucket' && maxVal > k_LIMIT * 10)) {
-            updateExplanation(`<b>Error:</b> Max value (<b>k = ${maxVal}</b>) is too large for ${algorithm}.
+        if ((algorithm === 'counting' && maxVal > k_LIMIT)) {
+            updateStatus(`<b>Error:</b> Max value (<b>k = ${Math.floor(maxVal)}</b>) is too large for ${algorithm}.
                 This sort is only efficient for small ranges (e.g., <b>k &le; ${k_LIMIT}</b>).
                 <br>Please try <b>Radix Sort</b> instead, or load a new array.`);
             setControls(true);
@@ -224,6 +225,81 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+    
+    helpBtn.addEventListener('click', () => {
+        populateHelpModal(algoSelect.value);
+        infoModal.classList.remove('hidden');
+    });
+
+    closeInfoBtn.addEventListener('click', () => {
+        infoModal.classList.add('hidden');
+    });
+
+    infoModal.addEventListener('click', (e) => {
+        if (e.target === infoModal) {
+            infoModal.classList.add('hidden');
+        }
+    });
+
+    function populateHelpModal(algoName) {
+         switch (algoName) {
+            case 'counting':
+                infoTitle.innerText = 'Counting Sort';
+                infoSteps.innerHTML = `
+                    <p>Counting Sort is an integer sorting algorithm. <b>It does not work with decimals.</b> It assumes each element is a non-negative integer in a known range (<b>k</b>).</p>
+                    <ul>
+                        <li><b>Phase 1: Counting</b>
+                            <p>The algorithm creates a new 'count' array of size <b>k+1</b>. It iterates through the main array, and for each value, it increments the corresponding index in the 'count' array.</p>
+                        </li>
+                        <li><b>Phase 2: Placing</b>
+                            <p>It iterates through the 'count' array (from 0 to k). For each index, it reads the count and places that many elements (of value <b>index</b>) back into the main array in order.</p>
+                        </li>
+                        <li><b>Time:</b> <b>O(n + k)</b></li>
+                        <li><b>Space:</b> <b>O(k)</b></li>
+                    </ul>
+                `;
+                break;
+            case 'bucket':
+                infoTitle.innerText = 'Bucket Sort';
+                infoSteps.innerHTML = `
+                    <p>Bucket Sort works by distributing elements into a number of 'buckets'. Each bucket is then sorted individually. <b>This is the only sort here that works with decimals.</b></p>
+                    <ul>
+                        <li><b>Phase 1: Create Buckets</b>
+                            <p>Finds the <b>min</b> and <b>max</b> values in the array. It then creates 10 empty buckets, each responsible for an equal part of the range (e.g., <b>[min]...[max]</b>).</p>
+                        </li>
+                        <li><b>Phase 2: Distribute</b>
+                            <p>The algorithm iterates through the main array. It calculates which bucket each value belongs to based on its position in the <b>min-max</b> range and places it inside.</p>
+                        </li>
+                        <li><b>Phase 3: Sort Buckets</b>
+                            <p>Each non-empty bucket is sorted. This visualizer uses <b>Insertion Sort</b> for this, which is efficient for small lists.</p>
+                        </li>
+                        <li><b>Phase 4: Concatenate</b>
+                            <p>All sorted buckets are joined back together in order to form the final, sorted array.</p>
+                        </li>
+                        <li><b>Time:</b> <b>O(n + k)</b> (Average)</li>
+                    </ul>
+                `;
+                break;
+            case 'radix':
+                infoTitle.innerText = 'Radix Sort (LSD)';
+                infoSteps.innerHTML = `
+                    <p>Radix Sort is a non-comparative integer sorting algorithm. <b>It does not work with decimals.</b> This (LSD) version sorts integers by processing individual digits, starting from the right-most (1's) to the left-most (100's, etc.).</p>
+                    <ul>
+                        <li><b>Pass 1 (1's Digit)</b>
+                            <p>Sorts the entire array *stably* based only on the 1's digit. The visualization shows this using <b>Counting Sort</b> as the subroutine.</p>
+                        </li>
+                        <li><b>Pass 2 (10's Digit)</b>
+                            <p>Sorts the *already-sorted* array based only on the 10's digit. Because the sort is stable, elements with the same 10's digit (e.g., 25, 21) will keep their order from the previous pass (21 will come before 25).</p>
+                        </li>
+                        <li><b>Pass 3+ (100's...)</b>
+                            <p>This continues for all digits until the array is fully sorted.</p>
+                        </li>
+                        <li><b>Time:</b> <b>O(d * (n + k))</b> where <b>d</b> is the number of digits in the max number.</li>
+                    </ul>
+                `;
+                break;
+        }
+    }
 
 
     // --- Sorting Algorithms ---
@@ -234,17 +310,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function countingSortVisual() {
         subArea.classList.remove('column-view');
 
-        updateExplanation(`Starting Counting Sort. Max value <b>k = ${maxVal}</b>.`);
+        let k = Math.floor(maxVal);
+        updateStatus(`Creating a 'count' array of size <b>k+1</b> (from 0 to ${k}).`);
         await sleep();
-        if (!isSorting) return; // Check if user exited
+        if (!isSorting) return;
 
-        // --- Phase 1: Counting ---
-        subAreaTitle.innerText = 'Count Array (Indices 0 to ' + maxVal + ')';
-        let countArray = new Array(maxVal + 1).fill(0);
+        subAreaTitle.innerText = 'Count Array (Indices 0 to ' + k + ')';
+        let countArray = new Array(k + 1).fill(0);
         let countCells = [];
-        const cellSize = Math.max(10, 50 - Math.floor(maxVal / 5));
+        const cellSize = Math.max(10, 50 - Math.floor(k / 5));
 
-        for (let i = 0; i <= maxVal; i++) {
+        for (let i = 0; i <= k; i++) {
             const cell = document.createElement('div');
             cell.classList.add('count-cell');
             cell.style.width = `${cellSize}px`;
@@ -257,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             countCells.push(cell);
         }
         
-        updateExplanation('<b>Phase 1:</b> Counting occurrences of each element.');
+        updateStatus('<b>Phase 1:</b> Counting occurrences. Iterating the main array and incrementing the count for each value in the \'count\' array.');
         const bars = getBars();
         for (let i = 0; i < mainArray.length; i++) {
             if (!isSorting) return;
@@ -276,11 +352,10 @@ document.addEventListener('DOMContentLoaded', () => {
             countCells[value].classList.remove('highlight-secondary');
         }
 
-        // --- Phase 2: Placing ---
-        updateExplanation('<b>Phase 2:</b> Placing elements back into the array based on counts.');
+        updateStatus('<b>Phase 2:</b> Placing elements. Reading the \'count\' array from left-to-right and placing that many elements back into the main array.');
         let sortedIndex = 0; 
 
-        for (let i = 0; i <= maxVal; i++) {
+        for (let i = 0; i <= k; i++) {
             if (!isSorting) return;
 
             countCells[i].classList.add('highlight-primary');
@@ -307,8 +382,8 @@ document.addEventListener('DOMContentLoaded', () => {
             countCells[i].classList.remove('highlight-primary');
         }
 
-        if (isSorting) { // Only show complete if it wasn't interrupted
-            updateExplanation('Counting Sort Complete. <b>O(n + k)</b>');
+        if (isSorting) {
+            updateStatus('Counting Sort Complete. Time: <b>O(n + k)</b>, Space: <b>O(k)</b>');
             setControls(true);
         }
     }
@@ -319,9 +394,20 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     async function bucketSortVisual() {
         subArea.classList.remove('column-view');
+        
+        const numBuckets = 10;
+        
+        let min = mainArray[0];
+        let max = mainArray[0];
+        for (let i = 1; i < mainArray.length; i++) {
+            if (mainArray[i] < min) min = mainArray[i];
+            if (mainArray[i] > max) max = mainArray[i];
+        }
+        max += 0.001; // Adjusted epsilon for 3-decimal precision
 
-        const numBuckets = Math.floor(maxVal / 10) + 1;
-        updateExplanation(`Starting Bucket Sort with ${numBuckets} buckets.`);
+        const bucketSize = (max - min) / numBuckets;
+
+        updateStatus(`<b>Phase 1:</b> Creating ${numBuckets} dynamic buckets...`);
         await sleep();
         if (!isSorting) return;
 
@@ -333,23 +419,28 @@ document.addEventListener('DOMContentLoaded', () => {
             const bucketDiv = document.createElement('div');
             bucketDiv.classList.add('bucket');
             
-            const rangeStart = i * 10;
-            const rangeEnd = (i === numBuckets - 1) ? maxVal : (i * 10) + 9;
-            const rangeLabel = `${rangeStart}-${rangeEnd}`;
+            // --- CHANGED to toFixed(3) ---
+            const rangeStart = min + (i * bucketSize);
+            const rangeEnd = min + ((i + 1) * bucketSize);
+            const rangeLabel = `[${rangeStart.toFixed(3)} - ${rangeEnd.toFixed(3)})`;
 
+            bucketDiv.dataset.rangeStart = rangeStart.toFixed(3);
+            bucketDiv.dataset.rangeEnd = rangeEnd.toFixed(3);
+            
             bucketDiv.innerHTML = `<div class="bucket-label">${rangeLabel} <span class="bucket-size">(0)</span></div>`;
             subArea.appendChild(bucketDiv);
             bucketElements.push(bucketDiv);
         }
 
-        updateExplanation('Distributing elements into buckets.');
+        updateStatus('<b>Phase 2:</b> Distributing elements into buckets...');
         const bars = getBars();
         for (let i = 0; i < mainArray.length; i++) {
             if (!isSorting) return;
             const value = mainArray[i];
             
-            const bucketIndex = Math.floor(value / 10);
-            
+            let bucketIndex = Math.floor((value - min) / bucketSize);
+            bucketIndex = Math.max(0, Math.min(bucketIndex, numBuckets - 1));
+
             bars[i].classList.add('highlight-primary');
             bucketElements[bucketIndex].style.backgroundColor = 'var(--primary-color)';
             await sleep();
@@ -361,7 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sizeSpan.innerText = `(${buckets[bucketIndex].length})`;
 
             const newBar = bars[i].cloneNode(true);
-            newBar.innerText = value;
+            // --- CHANGED to toFixed(3) ---
+            newBar.innerText = (value % 1 !== 0) ? value.toFixed(3) : value;
             newBar.style.width = '50px';
             bucketElements[bucketIndex].appendChild(newBar);
             
@@ -371,7 +463,7 @@ document.addEventListener('DOMContentLoaded', () => {
             bucketElements[bucketIndex].style.backgroundColor = '';
         }
 
-        updateExplanation('Sorting individual buckets (using Insertion Sort).');
+        updateStatus('<b>Phase 3:</b> Sorting individual buckets (Insertion Sort)...');
         let sortedArray = [];
         for (let i = 0; i < numBuckets; i++) {
             if (!isSorting) return;
@@ -387,8 +479,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (isSorting) {
-            setupNewArray(sortedArray); // This also calls setControls(true)
-            updateExplanation('Bucket Sort Complete. Average Case: <b>O(n + k)</b>');
+            updateStatus('<b>Phase 4:</b> Concatenating sorted buckets...');
+            
+            mainArray = [...sortedArray];
+            maxVal = Math.max(...mainArray);
+            if (maxVal === 0) maxVal = 1;
+            
+            renderBars(visArea, mainArray);
+            
+            await sleep();
+            if (!isSorting) return;
+
+            updateStatus('Bucket Sort Complete. Average Time: <b>O(n + k)</b>');
+            setControls(true);
         }
     }
     
@@ -421,8 +524,20 @@ document.addEventListener('DOMContentLoaded', () => {
             bucketArray[j + 1] = key;
             keyBar.classList.remove('highlight-primary');
         }
-        if (isSorting) { // Only render if not stopped
-            renderBars(bucketElement, bucketArray);
+        if (isSorting) {
+            const rangeStart = bucketElement.dataset.rangeStart;
+            const rangeEnd = bucketElement.dataset.rangeEnd;
+            bucketElement.innerHTML = `<div class="bucket-label">[${rangeStart} - ${rangeEnd}) <span class="bucket-size">(${bucketArray.length})</span></div>`;
+            
+            for(const val of bucketArray) {
+                const newBar = document.createElement('div');
+                newBar.classList.add('bar');
+                // --- CHANGED to toFixed(3) ---
+                newBar.innerText = (val % 1 !== 0) ? val.toFixed(3) : val;
+                newBar.style.width = '50px';
+                newBar.style.height = `${Math.max((val / maxVal) * 100, 5)}%`;
+                bucketElement.appendChild(newBar);
+            }
         }
     }
 
@@ -431,7 +546,7 @@ document.addEventListener('DOMContentLoaded', () => {
      * 3. RADIX SORT (LSD) VISUALIZATION
      */
     async function radixSortVisual() {
-        updateExplanation(`Starting Radix Sort (LSD).`);
+        updateStatus('Starting Radix Sort (LSD).');
         
         clearSubArea();
         subArea.classList.add('column-view');
@@ -451,14 +566,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             renderBars(visArea, mainArray, exp);
             const passNum = Math.floor(Math.log10(exp)) + 1;
-            updateExplanation(`<b>Pass ${passNum}</b>: Sorting by the <b>${exp}'s</b> digit.`);
+            updateStatus(`<b>Pass ${passNum}</b>: Sorting by the <b>${exp}'s</b> digit...`);
             await sleep();
             if (!isSorting) return;
             
             mainArray = countingSortByDigitStable(mainArray, exp);
             
             renderBars(visArea, mainArray);
-            updateExplanation(`Array is now stable-sorted by the <b>${exp}'s</b> digit.`);
+            updateStatus(`Array is now stable-sorted by the <b>${exp}'s</b> digit.`);
             
             addRadixColumn(mainArray, `Pass ${passNum} (by ${exp}'s)`);
 
@@ -467,7 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         
         if (isSorting) {
-            updateExplanation('Radix Sort Complete. <b>O(d * (n + k))</b>');
+            updateStatus('Radix Sort Complete. Time: <b>O(d * (n + k))</b>');
             setControls(true);
         }
     }
@@ -495,8 +610,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     /**
-     * Helper for Radix Sort: Stable Counting Sort by digit.
-     */
+    * Helper for Radix Sort: Stable Counting Sort by digit.
+    */
     function countingSortByDigitStable(arr, exp) {
         let n = arr.length;
         let output = new Array(n);
@@ -508,7 +623,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         for (let i = 1; i < 10; i++) {
-            count[i] += count[i - 1];
+            count[i] += count[i-1];
         }
 
         for (let i = n - 1; i >= 0; i--) {
