@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const infoTitle = document.getElementById('info-title');
     const infoSteps = document.getElementById('info-steps');
 
+    // --- New Audio Elements ---
+    const muteBtn = document.getElementById('mute-btn');
+    const bgMusic = document.getElementById('bg-music');
+
     // --- State ---
     let mainArray = [];
     let isSorting = false;
@@ -27,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let pauseResolver = null;
     let maxDigits = 1;
     let isDecimalArray = false;
+    let musicStarted = false; // To prevent autoplay errors
 
     // --- Utility Functions ---
 
@@ -103,7 +108,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 bar.title = `Value: ${array[i]}, Digit: ${digit}`;
                 bar.style.backgroundColor = `hsl(${digit * 36}, 70%, 50%)`; 
             } else {
-                // --- CHANGED to toFixed(3) ---
                 bar.innerText = (array[i] % 1 !== 0) ? array[i].toFixed(3) : array[i];
                 bar.title = `Value: ${array[i]}`;
                 bar.style.backgroundColor = '';
@@ -118,7 +122,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateBar(bar, value) {
         const height = (value / maxVal) * 100;
         bar.style.height = `${Math.max(height, 5)}%`;
-        // --- CHANGED to toFixed(3) ---
         bar.innerText = (value % 1 !== 0) ? value.toFixed(3) : value;
         bar.dataset.value = value;
     }
@@ -173,6 +176,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners ---
     startBtn.addEventListener('click', () => {
+        
+        // --- NEW: Play music on first click ---
+        if (!musicStarted) {
+            bgMusic.play().catch(e => console.error("Audio play failed:", e));
+            musicStarted = true;
+        }
+        // --- END NEW ---
+
         const algorithm = algoSelect.value;
         
         if (isDecimalArray && (algorithm === 'counting' || algorithm === 'radix')) {
@@ -223,6 +234,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 pauseResolver();
                 pauseResolver = null;
             }
+        }
+    });
+    
+    // --- New Mute Button Listener ---
+    muteBtn.addEventListener('click', () => {
+        bgMusic.muted = !bgMusic.muted;
+        if (bgMusic.muted) {
+            muteBtn.innerText = 'Unmute';
+            muteBtn.classList.remove('btn-pause-active'); // Use same style as "Resume"
+        } else {
+            muteBtn.innerText = 'Mute';
+            muteBtn.classList.add('btn-pause-active');
         }
     });
     
@@ -403,7 +426,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (mainArray[i] < min) min = mainArray[i];
             if (mainArray[i] > max) max = mainArray[i];
         }
-        max += 0.001; // Adjusted epsilon for 3-decimal precision
+        max += 0.001;
 
         const bucketSize = (max - min) / numBuckets;
 
@@ -419,7 +442,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const bucketDiv = document.createElement('div');
             bucketDiv.classList.add('bucket');
             
-            // --- CHANGED to toFixed(3) ---
             const rangeStart = min + (i * bucketSize);
             const rangeEnd = min + ((i + 1) * bucketSize);
             const rangeLabel = `[${rangeStart.toFixed(3)} - ${rangeEnd.toFixed(3)})`;
@@ -452,7 +474,6 @@ document.addEventListener('DOMContentLoaded', () => {
             sizeSpan.innerText = `(${buckets[bucketIndex].length})`;
 
             const newBar = bars[i].cloneNode(true);
-            // --- CHANGED to toFixed(3) ---
             newBar.innerText = (value % 1 !== 0) ? value.toFixed(3) : value;
             newBar.style.width = '50px';
             bucketElements[bucketIndex].appendChild(newBar);
@@ -532,7 +553,6 @@ document.addEventListener('DOMContentLoaded', () => {
             for(const val of bucketArray) {
                 const newBar = document.createElement('div');
                 newBar.classList.add('bar');
-                // --- CHANGED to toFixed(3) ---
                 newBar.innerText = (val % 1 !== 0) ? val.toFixed(3) : val;
                 newBar.style.width = '50px';
                 newBar.style.height = `${Math.max((val / maxVal) * 100, 5)}%`;
