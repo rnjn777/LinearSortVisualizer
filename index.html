@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Linear Sort Visualizer</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -22,13 +22,12 @@
             </div>
             
             <div class="control-group">
-                <label for="speed-slider">Speed:</label>
-                <input type="range" id="speed-slider" min="10" max="1000" value="250" step="10">
+                <label for="speed-slider">Delay (ms):</label>
+                <input type="range" id="speed-slider" min="50" max="4000" value="1500" step="50">
             </div>
 
             <button id="start-btn" class="btn">Start</button>
-            <button id="pause-btn" class="btn btn-outline" disabled>Pause</button> 
-            
+            <button id="help-btn" class="btn btn-outline">Show Help</button>
             <button id="random-btn" class="btn btn-outline">Random Array</button>
         </nav>
         
@@ -47,11 +46,20 @@
             <h3 id="sub-area-title"></h3>
             <div id="sub-area" class="visualization-container"></div>
         </div>
-
-        <div id="explanation-box">
-            <p>Enter an array or generate a random one to begin.</p>
-        </div>
     </main>
+
+    <div id="status-bar">
+        <p id="status-text">Select an algorithm and press "Start".</p>
+        <button id="pause-btn" class="btn btn-outline" disabled>Pause</button> 
+    </div>
+
+    <div id="info-modal" class="info-modal-container hidden">
+        <div id="info-content-box">
+            <button id="close-info-btn">&times;</button>
+            <h2 id="info-title"></h2>
+            <div id="info-steps"></div>
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
