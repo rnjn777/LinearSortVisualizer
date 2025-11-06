@@ -3,8 +3,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- DOM Elements ---
     const algoSelect = document.getElementById('algo-select');
     const startBtn = document.getElementById('start-btn');
-    const stepBtn = document.getElementById('step-btn'); // Step button in header
-    const pauseBtn = document.getElementById('pause-btn'); // Button in status bar
+    const stepBtn = document.getElementById('step-btn');
+    const pauseBtn = document.getElementById('pause-btn');
     const randomBtn = document.getElementById('random-btn');
     const loadBtn = document.getElementById('load-btn');
     const arrayInput = document.getElementById('array-input');
@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const infoSteps = document.getElementById('info-steps');
     const muteBtn = document.getElementById('mute-btn');
     const bgMusic = document.getElementById('bg-music');
+    const themeToggleBtn = document.getElementById('theme-toggle-btn'); // New
 
     // --- State ---
     let mainArray = [];
@@ -170,15 +171,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isStepMode) {
                 pauseBtn.innerText = 'Next Step';
                 pauseBtn.classList.add('btn-step-active');
-                pauseBtn.disabled = false; // "Next Step" is enabled
-                startBtn.disabled = true; // "Auto" is disabled
-                stepBtn.disabled = true; // "Step-by-Step" is disabled
+                pauseBtn.disabled = false;
+                startBtn.disabled = true;
+                stepBtn.disabled = true;
             } else { // Auto mode
                 pauseBtn.innerText = 'Pause';
                 pauseBtn.classList.remove('btn-step-active');
-                pauseBtn.disabled = false; // "Pause" is enabled
-                startBtn.disabled = true; // "Auto" is disabled
-                stepBtn.disabled = true; // "Step-by-Step" is disabled
+                pauseBtn.disabled = false;
+                startBtn.disabled = true;
+                stepBtn.disabled = true;
             }
         }
     }
@@ -243,13 +244,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     pauseBtn.addEventListener('click', () => {
         if (isStepMode) {
-            // We are in "Next Step" mode
             if (pauseResolver) {
                 pauseResolver();
                 pauseResolver = null;
             }
         } else {
-            // We are in "Pause/Resume" mode
             isPaused = !isPaused;
             if (isPaused) {
                 pauseBtn.innerText = 'Resume';
@@ -292,6 +291,20 @@ document.addEventListener('DOMContentLoaded', () => {
             infoModal.classList.add('hidden');
         }
     });
+
+    // --- NEW: Theme Toggle Listener ---
+    themeToggleBtn.addEventListener('click', () => {
+        document.body.classList.toggle('light-mode');
+        
+        // Update button text
+        if (document.body.classList.contains('light-mode')) {
+            themeToggleBtn.innerText = 'Dark Mode';
+        } else {
+            themeToggleBtn.innerText = 'Light Mode';
+        }
+    });
+
+    // --- (All other functions are unchanged) ---
 
     function populateHelpModal(algoName) {
          switch (algoName) {
