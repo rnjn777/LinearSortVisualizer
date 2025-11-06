@@ -3,14 +3,14 @@
 
 /* --- CSS Variables for Sci-Fi Dark Mode --- */
 :root {
-    --bg-color: #0d0c1d; /* Deep space blue */
-    --primary-color: #1a1a3a; /* Dark panel blue/purple */
-    --secondary-color: #00f0ff; /* Electric cyan */
-    --accent-color: #c000ff; /* Neon purple/pink */
-    --text-color: #f0f0ff; /* Light, slightly blue text */
+    --bg-color: #0d0c1d;
+    --primary-color: #1a1a3a;
+    --secondary-color: #00f0ff;
+    --accent-color: #c000ff;
+    --text-color: #f0f0ff;
     
-    --highlight-primary: #ff00ff; /* Magenta glow */
-    --highlight-secondary: #00ff8c; /* Neon green glow */
+    --highlight-primary: #ff00ff;
+    --highlight-secondary: #00ff8c;
     --error-color: #e5383b;
     
     --font-family: 'Montserrat', sans-serif;
@@ -19,12 +19,12 @@
 
 body {
     background-color: var(--bg-color);
-    /* Subtle gradient from the bottom to add depth */
     background: radial-gradient(ellipse at bottom, var(--primary-color) 0%, var(--bg-color) 100%);
     color: var(--text-color);
     font-family: var(--font-family);
     margin: 0;
     padding: 1.5rem;
+    padding-bottom: 80px; /* Adjusted padding for taller status bar */
     min-height: 100vh;
     box-sizing: border-box;
     overflow-x: hidden;
@@ -32,11 +32,10 @@ body {
 
 /* --- Header & Controls (Glass Panel Look) --- */
 header {
-    background-color: rgba(26, 26, 58, 0.4); /* Semi-transparent panel */
+    background-color: rgba(26, 26, 58, 0.4);
     border: 1px solid var(--primary-color);
     padding: 1rem 2rem;
     border-radius: 12px;
-    /* Neon glow effect */
     box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), 0 0 5px rgba(0, 240, 255, 0.2) inset;
     margin-bottom: 2rem;
 }
@@ -47,7 +46,6 @@ header h1 {
     color: var(--secondary-color);
     font-family: var(--font-mono);
     font-weight: 700;
-    /* Neon text glow */
     text-shadow: 0 0 4px var(--secondary-color);
 }
 
@@ -76,23 +74,21 @@ select, .btn {
     color: var(--secondary-color);
     border: 2px solid var(--secondary-color);
     padding: 0.75rem 1rem;
-    border-radius: 4px; /* Sharper edges */
+    border-radius: 4px;
     font-family: var(--font-mono);
     font-weight: 700;
     cursor: pointer;
     transition: all 0.2s ease;
-    /* Faint glow */
     box-shadow: 0 0 5px rgba(0, 240, 255, 0.3);
 }
 
 select {
-    /* Style the dropdown options */
     background-color: var(--bg-color);
 }
 
 select:focus, .btn:focus {
     outline: none;
-    box-shadow: 0 0 12px var(--secondary-color); /* Brighten glow on focus */
+    box-shadow: 0 0 12px var(--secondary-color);
 }
 
 .btn:hover {
@@ -130,7 +126,6 @@ select:focus, .btn:focus {
 
 #speed-slider {
     cursor: pointer;
-    /* Simple chrome/webkit slider styling */
     -webkit-appearance: none;
     appearance: none;
     height: 3px;
@@ -187,31 +182,30 @@ select:focus, .btn:focus {
 /* --- Main Visualization Area --- */
 .visualization-container {
     display: flex;
-    align-items: flex-end; /* Aligns bars to the bottom */
+    align-items: flex-end;
     justify-content: center;
     min-height: 250px;
     padding: 1rem;
-    background-color: rgba(0,0,0,0.3); /* Transparent dark bg */
+    background-color: rgba(0,0,0,0.3);
     border-radius: 8px;
     margin-bottom: 1.5rem;
     border: 1px solid var(--primary-color);
-    gap: 2px; /* Spacing between bars */
+    gap: 2px;
     transition: all 0.3s ease;
 }
 
 /* --- Bar Styles --- */
 .bar {
     width: 20px;
-    background-color: var(--secondary-color); /* Bright cyan bars */
+    background-color: var(--secondary-color);
     border: none;
-    border-radius: 2px 2px 0 0; /* Slightly rounded top */
+    border-radius: 2px 2px 0 0;
     text-align: center;
     color: var(--bg-color);
     font-size: 0.8rem;
     font-weight: 700;
     font-family: var(--font-mono);
     box-sizing: border-box;
-    /* Faint glow for each bar */
     box-shadow: 0 0 2px var(--secondary-color);
     transition: 
         height 0.3s ease, 
@@ -241,7 +235,6 @@ select:focus, .btn:focus {
     padding: 5px;
     margin: 0 5px;
     transition: background-color 0.3s ease;
-    /* Inset shadow to look like a "receptacle" */
     box-shadow: 0 0 10px var(--primary-color) inset;
 }
 
@@ -303,23 +296,126 @@ select:focus, .btn:focus {
     box-shadow: none;
 }
 
-/* --- Explanation Box --- */
-#explanation-box {
-    background-color: rgba(26, 26, 58, 0.4); /* Semi-transparent panel */
-    border: 1px solid var(--primary-color);
-    border-radius: 8px;
-    padding: 1.5rem;
-    font-size: 1.1rem;
-    line-height: 1.6;
-    font-weight: 400;
-    text-align: center;
-    box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+/* --- UPDATED: Status Bar --- */
+#status-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--primary-color);
+    border-top: 1px solid var(--secondary-color);
+    box-shadow: 0 0 10px var(--secondary-color);
+    padding: 0.5rem 1.5rem; /* Adjusted padding */
+    box-sizing: border-box;
+    z-index: 10;
+    
+    /* NEW: Flexbox to align text and button */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-#explanation-box b {
+#status-bar p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    flex-grow: 1; /* Make text take up available space */
+}
+
+#status-bar b {
     color: var(--highlight-secondary);
     font-weight: 700;
 }
+
+/* NEW: Style for pause button inside status bar */
+#status-bar #pause-btn {
+    margin-left: 1rem; /* Add space */
+    flex-shrink: 0; /* Don't let the button shrink */
+}
+
+
+/* --- Info Modal Styles --- */
+.info-modal-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(13, 12, 29, 0.8);
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.info-modal-container.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#info-content-box {
+    background-color: var(--bg-color);
+    border: 1px solid var(--secondary-color);
+    border-radius: 12px;
+    box-shadow: 0 0 25px var(--secondary-color);
+    padding: 2rem;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+#info-content-box h2 {
+    color: var(--secondary-color);
+    text-shadow: 0 0 5px var(--secondary-color);
+    margin-top: 0;
+}
+
+#info-content-box ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+#info-content-box li {
+    padding-left: 1.5rem;
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+#info-content-box li::before {
+    content: '»';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--secondary-color);
+    font-weight: 700;
+}
+
+#info-content-box b {
+    color: var(--highlight-secondary);
+}
+
+#close-info-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-size: 2rem;
+    font-weight: 300;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+#close-info-btn:hover {
+    color: var(--secondary-color);
+}
+
 
 /* --- Radix Column History View --- */
 #sub-area.column-view {
